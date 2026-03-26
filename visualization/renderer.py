@@ -1,54 +1,50 @@
-
 import pygame
+from physics.player_physics import create_space, create_player, create_ground, apply_input, step
+
 pygame.init()
 
+WIDTH, HEIGHT = 1390, 745
+
 background = pygame.image.load("visualization/assets/stadium.jpg")
-background = pygame.transform.scale(background, (1390, 745))
+background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+
 
 def render_game():
-    screen = pygame.display.set_mode((1390, 745))
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
     running = True
-    dt = 0
 
-    player_pos = pygame.Vector2(85, 475)
+    space = create_space()
+    body = create_player(space)
+    create_ground(space, WIDTH)
 
     while running:
+        dt = clock.tick(60) / 1000
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-        background = pygame.image.load("visualization/assets/stadium.jpg")
-        background = pygame.transform.scale(background, (1390, 745))
+        keys = pygame.key.get_pressed()
+        apply_input(body, (keys[pygame.K_a], keys[pygame.K_d]))
+
+        step(space, dt)
 
         screen.blit(background, (0, 0))
-
-        draw_stickman(screen, player_pos)
-
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_a]:
-            player_pos.x -= 300 * dt
-        if keys[pygame.K_d]:
-            player_pos.x += 300 * dt
+        draw_stickman(screen, body.position)
 
         pygame.display.flip()
-
-        # limits FPS to 60
-        # dt is delta time in seconds since last frame, used for framerate-
-        # independent physics.
-        dt = clock.tick(60) / 1000
 
     pygame.quit()
 
 
 def draw_stickman(screen, pos):
-    x, y = pos
-    # head
+    x, y = int(pos.x), int(pos.y)
+
     pygame.draw.circle(screen, "black", (x, y), 20)
-    # body
     pygame.draw.line(screen, "black", (x, y+20), (x, y+80), 4)
-    # arms
     pygame.draw.line(screen, "black", (x-30, y+50), (x+30, y+50), 4)
-    # legs
     pygame.draw.line(screen, "black", (x, y+80), (x-20, y+120), 4)
     pygame.draw.line(screen, "black", (x, y+80), (x+20, y+120), 4)
+
+
