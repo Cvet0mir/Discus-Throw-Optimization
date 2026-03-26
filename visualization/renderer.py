@@ -11,7 +11,7 @@ def render_game():
     running = True
     dt = 0
 
-    player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+    player_pos = pygame.Vector2(85, 475)
 
     while running:
         for event in pygame.event.get():
@@ -48,11 +48,11 @@ def render_game():
 def draw_stickman(screen, pos):
     x, y = pos
     # head
-    pygame.draw.circle(screen, "black", (x, y), 10)
+    pygame.draw.circle(screen, "black", (x, y), 20)
     # body
-    pygame.draw.line(screen, "black", (x, y+10), (x, y+40), 2)
+    pygame.draw.line(screen, "black", (x, y+20), (x, y+80), 4)
     # arms
-    pygame.draw.line(screen, "black", (x-15, y+25), (x+15, y+25), 2)
+    pygame.draw.line(screen, "black", (x-30, y+50), (x+30, y+50), 4)
     # legs
-    pygame.draw.line(screen, "black", (x, y+40), (x-10, y+60), 2)
-    pygame.draw.line(screen, "black", (x, y+40), (x+10, y+60), 2)
+    pygame.draw.line(screen, "black", (x, y+80), (x-20, y+120), 4)
+    pygame.draw.line(screen, "black", (x, y+80), (x+20, y+120), 4)
