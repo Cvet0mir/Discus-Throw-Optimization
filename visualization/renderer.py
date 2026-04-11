@@ -1,6 +1,8 @@
 import pygame
 
 from physics.player_physics import create_space, create_player, create_ground, apply_input, step
+from physics.throw import apply_throw
+
 from utils.sliders import Slider
 from .slider_panel import draw_slider_panel
 from .formula_panel import draw_formula_panel
@@ -81,6 +83,16 @@ def render_game():
             angle_slider.handle_event(event)
             velocity_slider.handle_event(event)
             height_slider.handle_event(event)
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    apply_throw(
+                        body,
+                        angle_slider.value,
+                        velocity_slider.value,
+                        height_slider.value,
+                        HEIGHT
+                    )
 
         keys = pygame.key.get_pressed()
         apply_input(body, (keys[pygame.K_a], keys[pygame.K_d]))
