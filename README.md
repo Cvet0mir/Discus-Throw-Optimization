@@ -3,7 +3,6 @@
 A physics-based interactive simulation of a discus throw built with **Python and Pygame**.  
 The project models projectile motion using real-world parameters and visualizes how angle, velocity, and initial height affect the trajectory of a thrown object.
 
----
 
 ## 🎯 Purpose of the Project
 
@@ -18,28 +17,26 @@ It demonstrates how the motion of a discus can be described using a parabolic tr
 
 The goal is to make abstract physics concepts **interactive, visual, and intuitive**.
 
----
 
 ## 🧠 Mathematical Model
 
 The projectile motion is based on the equation:
 
-\[
-y = x \tan(\theta) - \frac{g x^2}{2 v^2 \cos^2(\theta)}
-\]
+$$
+y = x \tan(\theta) - \frac{g x^2}{2 v^2 \cos^2(\theta)} + h₀
+$$
 
 Where:
-- \( \theta \) — launch angle (degrees)
-- \( v \) — initial velocity (m/s)
-- \( h₀ \) — initial height (m)
-- \( g \) — gravitational acceleration
+- θ — launch angle (degrees)
+- v — initial velocity (m/s)
+- h₀ — initial height (m)
+- g — gravitational acceleration
 
 The simulation also allows real-time adjustment of:
 - Launch angle (θ)
 - Velocity (v)
 - Starting height (h₀)
 
----
 
 ## 🖥️ Features
 
@@ -66,7 +63,6 @@ The simulation also allows real-time adjustment of:
   - Slider panel
 - Physics logic separated from rendering
 
----
 
 ## 🧪 How It Works
 
@@ -80,5 +76,3 @@ The simulation also allows real-time adjustment of:
 3. The object is rendered frame-by-frame following a parabolic trajectory.
 
 4. The formula panel updates in real-time to reflect current parameters.
-
----
