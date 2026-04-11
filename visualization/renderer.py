@@ -1,6 +1,9 @@
 import pygame
+
 from physics.player_physics import create_space, create_player, create_ground, apply_input, step
 from utils.sliders import Slider
+from .slider_panel import draw_slider_panel
+from .formula_panel import draw_formula_panel
 
 pygame.init()
 
@@ -12,10 +15,13 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 background = pygame.image.load("visualization/assets/stadium.jpg")
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
+UI_FONT = pygame.font.SysFont("Arial", 20)
+TITLE_FONT = pygame.font.SysFont("Arial", 28, bold=True)
+
 
 def show_start_screen(screen):
-    font_big = pygame.font.SysFont("Arial", 60)
-    font_small = pygame.font.SysFont("Arial", 30)
+    font_big = TITLE_FONT
+    font_small = UI_FONT
 
     start_time = pygame.time.get_ticks()
     duration = 2500
@@ -40,8 +46,6 @@ def show_start_screen(screen):
 
 
 def render_game():
-    font = pygame.font.SysFont("Arial", 20)
-
     panel_width = 320
     panel_height = 260
     panel_x = WIDTH - panel_width - 20
@@ -49,7 +53,12 @@ def render_game():
 
     angle_slider = Slider(panel_x + 20, panel_y + 80, 260, 10, 80, 45, "θ (Angle)", "°")
     velocity_slider = Slider(panel_x + 20, panel_y + 140, 260, 5, 50, 20, "v (Velocity)", " m/s")
-    height_slider = Slider(panel_x + 20, panel_y + 200, 260, 10, 250, 50, "h (Initial Height)", " cm")
+    height_slider = Slider(panel_x + 20, panel_y + 200, 260, 10, 250, 50, "h (Height)", " cm")
+
+    formula_x = 20
+    formula_y = 20
+    formula_width = 420
+    formula_height = 130
 
     clock = pygame.time.Clock()
 
@@ -81,18 +90,26 @@ def render_game():
         screen.blit(background, (0, 0))
         draw_stickman(screen, body.position)
 
-        panel = pygame.Surface((panel_width, panel_height))
-        panel.set_alpha(140)
-        panel.fill((0, 0, 0))
-        screen.blit(panel, (panel_x, panel_y))
+        draw_slider_panel(
+            screen,
+            panel_x, panel_y,
+            panel_width, panel_height,
+            "Parameters",
+            [angle_slider, velocity_slider, height_slider],
+            UI_FONT,
+            TITLE_FONT
+        )
 
-        title_font = pygame.font.SysFont("Arial", 32, bold=True)
-        title = title_font.render("Parameters", True, (220, 50, 50))
-        screen.blit(title, (panel_x + 80, panel_y + 15))
-
-        angle_slider.draw(screen, font)
-        velocity_slider.draw(screen, font)
-        height_slider.draw(screen, font)
+        draw_formula_panel(
+            screen,
+            formula_x, formula_y,
+            formula_width, formula_height,
+            angle_slider.value,
+            velocity_slider.value,
+            height_slider.value,
+            UI_FONT,
+            TITLE_FONT
+        )
 
         pygame.display.flip()
 
@@ -106,7 +123,6 @@ def draw_stickman(screen, pos):
     head_radius = int(20 * scale)
 
     pygame.draw.circle(screen, "black", (x, y), head_radius)
-
     pygame.draw.line(screen, "black",
                      (x, y + int(20 * scale)),
                      (x, y + int(80 * scale)), 3)
