@@ -58,7 +58,7 @@ def render_game():
     formula_x = 20
     formula_y = 20
     formula_width = 420
-    formula_height = 130
+    formula_height = 160
 
     clock = pygame.time.Clock()
 

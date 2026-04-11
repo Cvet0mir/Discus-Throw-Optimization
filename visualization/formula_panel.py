@@ -9,7 +9,9 @@ def draw_formula_panel(screen, x, y, width, height, theta, velocity, height_cm, 
     title = title_font.render("Discus Motion", True, (220, 50, 50))
     screen.blit(title, (x + 80, y + 10))
 
-    line2 = ui_font.render("y = x·tan(θ) − (g·x²)/(2·v²·cos²(θ))", True, (200, 200, 200))
+    formula_img = pygame.image.load("visualization/assets/formula.png")
+    screen.blit(formula_img, (x + 10, y + 45))
+
     line3 = ui_font.render("Inputs: θ, v, h", True, "gray")
 
     h_m = height_cm / 100.0
@@ -19,7 +21,6 @@ def draw_formula_panel(screen, x, y, width, height, theta, velocity, height_cm, 
         (255, 200, 0)
     )
 
-    screen.blit(line2, (x + 10, y + 45))
-    screen.blit(line3, (x + 10, y + 75))
-    screen.blit(line4, (x + 10, y + 100))
+    screen.blit(line3, (x + 10, y + 110))
+    screen.blit(line4, (x + 10, y + 130))
 
