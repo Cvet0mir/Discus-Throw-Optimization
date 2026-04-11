@@ -1,7 +1,8 @@
 import pygame
 
-from physics.player_physics import create_space, create_player, create_ground, apply_input, step
+from physics.player_physics import create_space, create_player, create_ground, step
 from physics.throw import apply_throw
+from physics.trajectory import compute_trajectory
 
 from utils.sliders import Slider
 from .slider_panel import draw_slider_panel
@@ -53,6 +54,8 @@ def render_game():
     panel_x = WIDTH - panel_width - 20
     panel_y = 20
 
+    GROUND_Y = HEIGHT - 100
+
     angle_slider = Slider(panel_x + 20, panel_y + 80, 260, 10, 80, 45, "θ (Angle)", "°")
     velocity_slider = Slider(panel_x + 20, panel_y + 140, 260, 5, 50, 20, "v (Velocity)", " m/s")
     height_slider = Slider(panel_x + 20, panel_y + 200, 260, 10, 250, 50, "h (Height)", " cm")
@@ -91,17 +94,45 @@ def render_game():
                         angle_slider.value,
                         velocity_slider.value,
                         height_slider.value,
-                        HEIGHT
+                        GROUND_Y
                     )
-
-        keys = pygame.key.get_pressed()
-        apply_input(body, (keys[pygame.K_a], keys[pygame.K_d]))
-
         step(space, dt)
 
         screen.blit(background, (0, 0))
-        draw_stickman(screen, body.position)
 
+        start_x = body.position.x
+
+        trajectory_points, landing_point = compute_trajectory(
+            body.position.x,
+            GROUND_Y,
+            angle_slider.value,
+            velocity_slider.value,
+            height_slider.value
+        )
+
+        for point in trajectory_points:
+            pygame.draw.circle(screen, (255, 255, 0), point, 2)
+
+        if landing_point:
+            pygame.draw.circle(
+                screen,
+                (255, 0, 0),
+                (int(landing_point[0]), int(landing_point[1])),
+                6
+            )
+
+        if landing_point:
+            distance_px = landing_point[0] - body.position.x
+            distance_m = distance_px / 50
+
+            distance_text = UI_FONT.render(
+                f"Distance: {distance_m:.2f} m",
+                True,
+                (255, 200, 0)
+            )
+            screen.blit(distance_text, (20, HEIGHT - 40))
+
+        draw_stickman(screen, body.position)
         draw_slider_panel(
             screen,
             panel_x, panel_y,
