@@ -2,7 +2,7 @@ import pygame
 
 
 class Slider:
-    def __init__(self, x, y, w, min_val, max_val, start_val, label):
+    def __init__(self, x, y, w, min_val, max_val, start_val, label, unit=""):
         self.rect = pygame.Rect(x, y, w, 6)
         self.min = min_val
         self.max = max_val
@@ -10,6 +10,7 @@ class Slider:
         self.handle_x = x + (start_val - min_val) / (max_val - min_val) * w
         self.dragging = False
         self.label = label
+        self.unit = unit
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -29,5 +30,11 @@ class Slider:
         pygame.draw.rect(screen, "white", self.rect)
         pygame.draw.circle(screen, "red", (int(self.handle_x), self.rect.y + 3), 8)
 
-        text = font.render(f"{self.label}: {int(self.value)}", True, "white")
+        if isinstance(self.value, float):
+            val = round(self.value, 1)
+        else:
+            val = int(self.value)
+
+        text = font.render(f"{self.label}: {val}{self.unit}", True, "white")
         screen.blit(text, (self.rect.x, self.rect.y - 25))
+    

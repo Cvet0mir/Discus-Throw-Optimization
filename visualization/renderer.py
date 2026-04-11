@@ -46,10 +46,10 @@ def render_game():
     panel_height = 260
     panel_x = WIDTH - panel_width - 20
     panel_y = 20
-    
-    angle_slider = Slider(panel_x + 20, panel_y + 80, 260, 10, 80, 45, "θ (Angle)")
-    velocity_slider = Slider(panel_x + 20, panel_y + 140, 260, 5, 50, 20, "v (Velocity)")
-    height_slider = Slider(panel_x + 20, panel_y + 200, 260, 0, 100, 20, "h (Height)")
+
+    angle_slider = Slider(panel_x + 20, panel_y + 80, 260, 10, 80, 45, "θ (Angle)", "°")
+    velocity_slider = Slider(panel_x + 20, panel_y + 140, 260, 5, 50, 20, "v (Velocity)", " m/s")
+    height_slider = Slider(panel_x + 20, panel_y + 200, 260, 10, 250, 50, "h (Initial Height)", " cm")
 
     clock = pygame.time.Clock()
 
