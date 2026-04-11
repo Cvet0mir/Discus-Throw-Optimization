@@ -12,7 +12,7 @@ def create_player(space):
     moment = pymunk.moment_for_circle(mass, 0, radius)
 
     body = pymunk.Body(mass, moment)
-    body.position = (85, 475)
+    body.position = (50, 325)
 
     shape = pymunk.Circle(body, radius)
     space.add(body, shape)
