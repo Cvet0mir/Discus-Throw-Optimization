@@ -5,8 +5,8 @@ from physics.throw import apply_throw
 from physics.trajectory import compute_trajectory
 
 from utils.sliders import Slider
-from .slider_panel import draw_slider_panel
-from .formula_panel import draw_formula_panel
+from .ui.slider_panel import draw_slider_panel
+from .ui.formula_panel import draw_formula_panel
 
 pygame.init()
 
