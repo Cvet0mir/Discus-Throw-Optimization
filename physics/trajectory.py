@@ -1,24 +1,25 @@
 import math
 
-SCALE = 50
-g = 9.81 * SCALE
+g = 9.81
 
-def compute_trajectory(start_x, start_y, angle_deg, velocity):
+def compute_trajectory(start_x, start_y, angle_deg, velocity, ppm):
     points = []
 
     theta = math.radians(angle_deg)
 
-    v = velocity * SCALE
+    velocity = max(8, min(32, velocity))
 
-    vx = v * math.cos(theta)
-    vy = -v * math.sin(theta)
+    v_pixels = velocity * ppm * 0.83
+
+    vx = v_pixels * math.cos(theta)
+    vy = -v_pixels * math.sin(theta)
 
     t = 0
     dt = 0.05
 
     while True:
         x = start_x + vx * t
-        y = start_y + vy * t + 0.5 * g * t**2
+        y = start_y + vy * t + 0.5 * g * ppm * t**2
 
         if y >= 600:
             return points, (x, 600)

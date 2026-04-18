@@ -52,11 +52,12 @@ def render_game():
     panel_y = 20
 
     GROUND_Y = 600
-    PIXELS_PER_METER = 50
+
+    PIXELS_PER_METER = 17.5
 
     angle_slider = Slider(panel_x + 20, panel_y + 80, 260, 10, 80, 45, "θ (Angle)", "°")
-    velocity_slider = Slider(panel_x + 20, panel_y + 140, 260, 5, 50, 20, "v (Velocity)", " m/s")
-    height_slider = Slider(panel_x + 20, panel_y + 200, 260, 100, 250, 180, "h (Height)", " cm")
+    velocity_slider = Slider(panel_x + 20, panel_y + 140, 260, 8, 32, 18, "v (Velocity)", " m/s")
+    height_slider = Slider(panel_x + 20, panel_y + 200, 260, 120, 220, 180, "h (Height)", " cm")
 
     clock = pygame.time.Clock()
 
@@ -86,9 +87,6 @@ def render_game():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
 
-                    height_px = (height_slider.value / 100) * PIXELS_PER_METER
-                    release_height_px = height_px * 0.75
-
                     hand_pos = draw_stickman(
                         screen,
                         body.position,
@@ -106,7 +104,8 @@ def render_game():
                         hand_pos[0],
                         hand_pos[1],
                         angle_slider.value,
-                        velocity_slider.value
+                        velocity_slider.value,
+                        PIXELS_PER_METER
                     )
 
         keys = pygame.key.get_pressed()
@@ -126,7 +125,8 @@ def render_game():
             hand_pos[0],
             hand_pos[1],
             angle_slider.value,
-            velocity_slider.value
+            velocity_slider.value,
+            PIXELS_PER_METER
         )
 
         for point in trajectory_points:

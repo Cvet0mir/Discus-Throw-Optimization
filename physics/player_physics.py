@@ -9,10 +9,9 @@ def create_space():
 def create_player(space):
     mass = 1
     radius = 20
-    moment = pymunk.moment_for_circle(mass, 0, radius)
 
     body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
-    body.position = (150, 600)
+    body.position = (80, 600)
 
     shape = pymunk.Circle(body, radius)
     space.add(body, shape)
