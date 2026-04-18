@@ -2,7 +2,7 @@ import pymunk
 
 def create_space():
     space = pymunk.Space()
-    space.gravity = (0, 900)
+    space.gravity = (0, 0)
     return space
 
 
@@ -11,8 +11,8 @@ def create_player(space):
     radius = 20
     moment = pymunk.moment_for_circle(mass, 0, radius)
 
-    body = pymunk.Body(mass, moment)
-    body.position = (50, 325)
+    body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
+    body.position = (150, 600)
 
     shape = pymunk.Circle(body, radius)
     space.add(body, shape)
@@ -26,19 +26,13 @@ def create_ground(space, width):
     space.add(ground)
 
 
-def move_player(body, keys):
-    if keys[True]:
-        ...
-
-
 def apply_input(body, keys):
     if keys[0]:
-        body.apply_force_at_local_point((-2000, 0))
+        body.position = (body.position.x - 2, body.position.y)
     if keys[1]:
-        body.apply_force_at_local_point((2000, 0))
+        body.position = (body.position.x + 2, body.position.y)
 
 
 def step(space, dt):
     space.step(dt)
-
 
