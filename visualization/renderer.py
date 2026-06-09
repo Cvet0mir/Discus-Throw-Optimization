@@ -57,7 +57,7 @@ def render_game():
     space = create_space()
     player_body = create_player(space)
     
-    player_body.position = (68, 600) 
+    player_body.position = (67, 600) 
     create_ground(space, WIDTH)
 
     state = "idle" 
@@ -103,8 +103,8 @@ def render_game():
             anim_timer += dt
             if anim_timer >= WINDUP_DURATION + RELEASE_DELAY:
                 state = "throwing"
-                release_hand = draw_stickman(screen, player_body.position, height_slider.value, 1.0, MAX_FORWARD_SHIFT, draw=False, is_throwing_pose=True)
                 
+                release_hand = draw_stickman(screen, player_body.position, height_slider.value, 1.0, MAX_FORWARD_SHIFT, draw=False, is_throwing_pose=True)
                 discus_pos = list(release_hand)
                 angle_rad = math.radians(angle_slider.value)
                 speed_px = velocity_slider.value * PIXELS_PER_METER * 0.83
@@ -139,12 +139,12 @@ def render_game():
                 swing_f = 1.0
                 current_forward_shift = MAX_FORWARD_SHIFT
                 is_throwing_pose = True
-                hold_discus = True  # Visually holds the ball during the late-release window
+                hold_discus = True
         elif state in ["throwing", "landed"]:
             swing_f = 1.0
             current_forward_shift = MAX_FORWARD_SHIFT
             is_throwing_pose = True
-            hold_discus = False # Ball is separate and tracking gravity now
+            hold_discus = False
         else:
             swing_f = 0.0
             current_forward_shift = 0.0
