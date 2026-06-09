@@ -56,11 +56,14 @@ def render_game():
 
     space = create_space()
     player_body = create_player(space)
+    
+    player_body.position = (60, 600) 
     create_ground(space, WIDTH)
 
     state = "idle" 
     anim_timer = 0.0
-    WINDUP_DURATION = 0.4 
+    WINDUP_DURATION = 0.6 
+    RELEASE_DELAY = 0.05
     
     discus_pos = None
     discus_velocity = [0, 0]
@@ -93,11 +96,14 @@ def render_game():
                     show_ui_trajectory = True
                     discus_pos = None
 
+        scale = height_slider.value / 180
+        MAX_FORWARD_SHIFT = 110 * scale 
+        
         if state == "windup":
             anim_timer += dt
-            if anim_timer >= WINDUP_DURATION:
+            if anim_timer >= WINDUP_DURATION + RELEASE_DELAY:
                 state = "throwing"
-                release_hand = draw_stickman(screen, player_body.position, height_slider.value, 1.0)
+                release_hand = draw_stickman(screen, player_body.position, height_slider.value, 1.0, MAX_FORWARD_SHIFT, draw=False, is_throwing_pose=True)
                 
                 discus_pos = list(release_hand)
                 angle_rad = math.radians(angle_slider.value)
@@ -121,22 +127,45 @@ def render_game():
             apply_input(player_body, (keys[pygame.K_a], keys[pygame.K_d]))
 
         step(space, dt)
-
         screen.blit(background, (0, 0))
 
-        swing_f = (anim_timer / WINDUP_DURATION) if state == "windup" else (1.0 if state != "idle" else 0.0)
-        hand_pos = draw_stickman(screen, player_body.position, height_slider.value, swing_f, hold_discus=(state in ["idle", "windup"]))
+        if state == "windup":
+            if anim_timer < WINDUP_DURATION:
+                swing_f = anim_timer / WINDUP_DURATION
+                current_forward_shift = swing_f * MAX_FORWARD_SHIFT
+                is_throwing_pose = False
+                hold_discus = True
+            else:
+                swing_f = 1.0
+                current_forward_shift = MAX_FORWARD_SHIFT
+                is_throwing_pose = True
+                hold_discus = True  # Visually holds the ball during the late-release window
+        elif state in ["throwing", "landed"]:
+            swing_f = 1.0
+            current_forward_shift = MAX_FORWARD_SHIFT
+            is_throwing_pose = True
+            hold_discus = False # Ball is separate and tracking gravity now
+        else:
+            swing_f = 0.0
+            current_forward_shift = 0.0
+            is_throwing_pose = False
+            hold_discus = True
+
+        hand_pos = draw_stickman(screen, player_body.position, height_slider.value, swing_f, current_forward_shift, 
+                                 hold_discus=hold_discus, is_throwing_pose=is_throwing_pose)
 
         if state in ["throwing", "landed"] and discus_pos:
             pygame.draw.circle(screen, (255, 0, 0), (int(discus_pos[0]), int(discus_pos[1])), int(10 * (height_slider.value/180)))
 
         if show_ui_trajectory:
-            pts, landing = compute_trajectory(hand_pos[0], hand_pos[1], angle_slider.value, velocity_slider.value, PIXELS_PER_METER)
+            future_hand_pos = draw_stickman(screen, player_body.position, height_slider.value, 1.0, MAX_FORWARD_SHIFT, draw=False, is_throwing_pose=True)
+            
+            pts, landing = compute_trajectory(future_hand_pos[0], future_hand_pos[1], angle_slider.value, velocity_slider.value, PIXELS_PER_METER)
             for p in pts: pygame.draw.circle(screen, (255, 255, 0), p, 2)
             if landing:
                 pygame.draw.circle(screen, (255, 0, 0), (int(landing[0]), int(landing[1])), 6)
                 
-                dist_m = (landing[0] - hand_pos[0]) / PIXELS_PER_METER
+                dist_m = (landing[0] - future_hand_pos[0]) / PIXELS_PER_METER
                 dist_text = UI_FONT.render(f"Predicted Distance: {dist_m:.2f} m", True, (255, 200, 0))
                 screen.blit(dist_text, (20, HEIGHT - 40))
 
@@ -176,31 +205,67 @@ def render_game():
     pygame.quit()
 
 
-def draw_stickman(screen, pos, height_cm, swing_factor=0.0, hold_discus=True):
-    x, ground_y = int(pos.x), int(pos.y)
+def draw_stickman(screen, pos, height_cm, swing_factor=0.0, forward_shift=0.0, hold_discus=True, draw=True, is_throwing_pose=False):
     scale = height_cm / 180
-    lean = int(10 * swing_factor * scale)
-    body_h = int(120 * scale)
-    head_y = ground_y - body_h
-    head_r = int(10 * scale)
-
-    pygame.draw.circle(screen, "black", (x + lean, head_y), head_r)
-    body_top, body_bot = head_y + head_r, ground_y - int(40 * scale)
-    pygame.draw.line(screen, "black", (x + lean, body_top), (x, body_bot), 3)
-
-    sh_y = body_top + int(30 * scale)
-    reach_x, reach_y = -25 + (65 * swing_factor), 0 - (30 * swing_factor)
-    l_hand = (x + int(reach_x * scale) + lean, sh_y + int(reach_y * scale))
-    r_hand = (x + int(25 * scale), sh_y + int(10 * scale))
-
-    pygame.draw.line(screen, "black", (x + lean, sh_y), l_hand, 3)
-    pygame.draw.line(screen, "black", (x + lean, sh_y), r_hand, 3)
-
-    pygame.draw.line(screen, "black", (x, body_bot), (x - int(20 * scale), ground_y), 3)
-    pygame.draw.line(screen, "black", (x, body_bot), (x + int(20 * scale), ground_y), 3)
+    center_x = int(pos.x + forward_shift) 
+    ground_y = int(pos.y)
     
-    if hold_discus:
-        pygame.draw.circle(screen, (255, 0, 0), l_hand, int(10 * scale))
+    body_h = int(120 * scale)
+    head_r = int(12 * scale)
+    torso_len = int(50 * scale)
+    arm_len = int(45 * scale)
+    leg_len = int(40 * scale)
+    
+    if is_throwing_pose:
+        hip_x, hip_y = center_x - int(10 * scale), ground_y - leg_len
+        shoulder_x = hip_x + int(35 * scale)   
+        shoulder_y = hip_y - int(42 * scale)
+        
+        head_x = shoulder_x + int(10 * scale)
+        head_y = shoulder_y - head_r - int(2 * scale)
+        
+        l_hand_x = shoulder_x + int(arm_len * 1.1 * scale)
+        l_hand_y = shoulder_y - int(20 * scale)
+        l_hand = (l_hand_x, l_hand_y)
+        
+        r_hand_x = shoulder_x - int(arm_len * 0.8 * scale)
+        r_hand_y = shoulder_y + int(25 * scale)
+        r_hand = (r_hand_x, r_hand_y)
+        
+        left_foot_x = center_x + int(25 * scale)  
+        right_foot_x = center_x - int(30 * scale) 
+    else:
+        angle_rad = math.radians(-180 + (360 * swing_factor))
+        x_offset = math.cos(angle_rad)
+        
+        hip_x, hip_y = center_x, ground_y - leg_len
+        shoulder_x = center_x + int(15 * scale * x_offset)
+        shoulder_y = hip_y - torso_len
+        
+        head_x = shoulder_x + int(5 * scale * x_offset)
+        head_y = shoulder_y - head_r - int(5 * scale)
+        
+        l_hand_x = shoulder_x + int(arm_len * scale * math.cos(angle_rad + 0.3))
+        l_hand_y = shoulder_y - int(15 * scale * math.sin(angle_rad + 0.3)) - int(10 * scale * swing_factor)
+        l_hand = (l_hand_x, l_hand_y)
+        
+        r_hand_x = shoulder_x - int(arm_len * 0.7 * scale * math.cos(angle_rad))
+        r_hand_y = shoulder_y + int(10 * scale * math.sin(angle_rad))
+        r_hand = (r_hand_x, r_hand_y)
+        
+        left_foot_x = center_x - int(20 * scale) + int(10 * scale * math.sin(angle_rad * 2))
+        right_foot_x = center_x + int(20 * scale) - int(10 * scale * math.sin(angle_rad * 2))
 
+    if draw:
+        pygame.draw.circle(screen, "black", (head_x, head_y), head_r)
+        pygame.draw.line(screen, "black", (shoulder_x, shoulder_y), (hip_x, hip_y), 4)
+        pygame.draw.line(screen, "black", (hip_x, hip_y), (left_foot_x, ground_y), 4)
+        pygame.draw.line(screen, "black", (hip_x, hip_y), (right_foot_x, ground_y), 4)
+        pygame.draw.line(screen, "black", (shoulder_x, shoulder_y), l_hand, 3)
+        pygame.draw.line(screen, "black", (shoulder_x, shoulder_y), r_hand, 3)
+        
+        if hold_discus:
+            pygame.draw.circle(screen, (255, 0, 0), l_hand, int(10 * scale))
+            
     return l_hand
 
