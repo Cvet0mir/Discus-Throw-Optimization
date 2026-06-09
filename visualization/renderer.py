@@ -57,7 +57,7 @@ def render_game():
     space = create_space()
     player_body = create_player(space)
     
-    player_body.position = (60, 600) 
+    player_body.position = (68, 600) 
     create_ground(space, WIDTH)
 
     state = "idle" 
